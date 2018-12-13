@@ -11,8 +11,17 @@
 # iptables -A OUTPUT -d 15.15.15.51 -j ACCEPT
 ##################################
 
+# CHECK IF PACKET EXIST
+dpkg -s netfilter-persistent &> /dev/null
+if [ $? -eq 0 ]; then
+    echo "Package netfilter-persistent is installed!"
+else
+    echo "You need to install the package netfilter-persistent"
+    exit 1
+fi
+
 if [ "$(id -u)" != "0" ]; then
-    echo -e "\033[5;41;1;37m This script must be run as root \033[0m" 1>&2
+    echo -e "\033[6;41;1;37m This script must be run as root \033[0m" 1>&2
     exit 1
 fi
 
@@ -31,11 +40,6 @@ netfilter-persistent flush &> /dev/null
 # iptables -t nat -X
 # iptables -t mangle -F
 # iptables -t mangle -X
-
-# SET DEFAULT RULES ACCEPT
-# iptables -P INPUT ACCEPT
-# iptables -P FORWARD ACCEPT
-# iptables -P OUTPUT ACCEPT
 
 
 ######### POLICY INPUT #########
@@ -119,7 +123,7 @@ done
 netfilter-persistent save &> /dev/null
 
 #echo -e "\nDone!\r" && sleep 1
-echo -e "\n\033[5;42;1;37m Done! \033[0m\r" && sleep 1
+echo -e "\n\033[6;42;1;37m Done! \033[0m\r" && sleep 1
 
 echo -e "Do you wish to show chain?"
 select yn in "Yes" "No"; do
