@@ -11,6 +11,11 @@
 # iptables -A OUTPUT -d 15.15.15.51 -j ACCEPT
 ##################################
 
+if [ "$(id -u)" != "0" ]; then
+    echo -e "\033[5;41;1;37m This script must be run as root \033[0m" 1>&2
+    exit 1
+fi
+
 BAR='####################'
 
 # FLUSH
@@ -27,7 +32,7 @@ netfilter-persistent flush &> /dev/null
 # iptables -t mangle -F
 # iptables -t mangle -X
 
-# SET LDEFAULT RULES ACCEPT
+# SET DEFAULT RULES ACCEPT
 # iptables -P INPUT ACCEPT
 # iptables -P FORWARD ACCEPT
 # iptables -P OUTPUT ACCEPT
@@ -76,7 +81,7 @@ iptables -A OUTPUT -p tcp -m multiport --dport 53,123 -j ACCEPT
 iptables -A OUTPUT -p udp -m multiport --dport 53,123 -j ACCEPT
 
 # NAVIGATION
-iptables -A OUTPUT -p tcp -m multiport --dports 80,443 -j ACCEPT -m comment --comment "Navigazione Web"
+iptables -A OUTPUT -p tcp -m multiport --dports 80,443 -j ACCEPT -m comment --comment "Web Browsing"
 
 # MAIL
 iptables -A OUTPUT -p tcp -m multiport --dports 25,110,143,465,587,993,995 -j ACCEPT -m comment --comment "Mail"
@@ -85,8 +90,8 @@ iptables -A OUTPUT -p tcp -m multiport --dports 25,110,143,465,587,993,995 -j AC
 iptables -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT -m comment --comment "Ping Output"
 
 # PRINT
-iptables -A OUTPUT -p tcp -m multiport --dports 515,1900,5357,8611,8612,8613,9100 -j ACCEPT -m comment --comment "Stampa"
-iptables -A OUTPUT -p udp -m multiport --dports 515,1900,5357,8611,8612,8613,9100 -j ACCEPT -m comment --comment "Stampa"
+iptables -A OUTPUT -p tcp -m multiport --dports 515,1900,5357,8611,8612,8613,9100 -j ACCEPT -m comment --comment "Print"
+iptables -A OUTPUT -p udp -m multiport --dports 515,1900,5357,8611,8612,8613,9100 -j ACCEPT -m comment --comment "Print"
 
 # SNMP
 iptables -A OUTPUT -p udp -m multiport --dports 161,162 -j ACCEPT -m comment --comment "SNMP"
@@ -106,14 +111,15 @@ iptables -P INPUT DROP
 iptables -P OUTPUT DROP
 iptables -P FORWARD DROP
 
-echo -e "\nSave configuration"
+echo -e "\nSave config"
 for i in {1..20}; do
     echo -ne "\r${BAR:0:$i}" # print $i chars of $BAR from 0 position
     sleep .1
 done
 netfilter-persistent save &> /dev/null
 
-echo -e "\nDone!\r" && sleep 1
+#echo -e "\nDone!\r" && sleep 1
+echo -e "\n\033[5;42;1;37m Done! \033[0m\r" && sleep 1
 
 echo -e "Do you wish to show chain?"
 select yn in "Yes" "No"; do
